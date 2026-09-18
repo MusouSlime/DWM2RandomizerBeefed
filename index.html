@@ -1,0 +1,1048 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#17231b" />
+  <link rel="icon" href="data:," />
+  <title>DWM2 Randomizer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito:wght@500;650;750;850&display=swap');
+
+    :root {
+      color-scheme: light dark;
+      --bg: #edf2e8;
+      --paper: #f9fcf5;
+      --paper-2: #e4ebde;
+      --ink: #17231b;
+      --muted: #536158;
+      --line: #b7c4b9;
+      --green: #17693c;
+      --green-strong: #0f4e2b;
+      --lime: #b9e25d;
+      --lime-soft: #e5f5bd;
+      --danger: #a12f27;
+      --danger-soft: #f7ddd8;
+      --focus: #0c6e9c;
+      --shadow: 0 18px 45px rgba(29, 51, 36, .12);
+      --radius-lg: 24px;
+      --radius-md: 14px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0d1410;
+        --paper: #162019;
+        --paper-2: #202d23;
+        --ink: #eff7ec;
+        --muted: #b8c4ba;
+        --line: #3b4b3e;
+        --green: #74d99c;
+        --green-strong: #a1e7b9;
+        --lime: #b8e160;
+        --lime-soft: #2a3b21;
+        --danger: #ffaaa2;
+        --danger-soft: #412522;
+        --focus: #7fd2f7;
+        --shadow: 0 22px 55px rgba(0, 0, 0, .34);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { min-width: 0; }
+    body {
+      margin: 0;
+      min-width: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(rgba(23,105,60,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23,105,60,.035) 1px, transparent 1px),
+        var(--bg);
+      background-size: 24px 24px;
+      color: var(--ink);
+      font-family: "Nunito", ui-rounded, sans-serif;
+      line-height: 1.45;
+    }
+
+    button, input { font: inherit; }
+    button, label, input { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, input:focus-visible, .file-drop:focus-within {
+      outline: 3px solid color-mix(in srgb, var(--focus) 45%, transparent);
+      outline-offset: 2px;
+    }
+
+    .page {
+      width: min(980px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 40px 0 max(64px, env(safe-area-inset-bottom));
+    }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 24px;
+    }
+    .intro h1 {
+      max-width: 650px;
+      margin: 0;
+      font-size: clamp(2rem, 7vw, 4.4rem);
+      line-height: .98;
+      letter-spacing: -.045em;
+      font-weight: 850;
+    }
+    .intro p {
+      max-width: 610px;
+      margin: 16px 0 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+    .privacy-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--paper);
+      color: var(--muted);
+      white-space: nowrap;
+      font-size: .86rem;
+      font-weight: 750;
+    }
+    .privacy-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--green) 16%, transparent);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .card {
+      min-width: 0;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .main-card { border-radius: var(--radius-lg) 8px var(--radius-lg) var(--radius-lg); }
+    .side-card { border-radius: 8px var(--radius-lg) var(--radius-lg) var(--radius-lg); }
+    .section {
+      padding: 22px;
+      border-top: 1px solid var(--line);
+    }
+    .section:first-child { border-top: 0; }
+    .section-title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 14px;
+      font-size: 1rem;
+      font-weight: 850;
+    }
+    .step {
+      color: var(--green);
+      font-family: "DM Mono", ui-monospace, monospace;
+      font-size: .76rem;
+      font-weight: 500;
+    }
+
+    .file-drop {
+      display: block;
+      padding: 20px;
+      border: 2px dashed var(--line);
+      border-radius: var(--radius-md);
+      background: var(--paper-2);
+      cursor: pointer;
+      transition: border-color .16s ease, background .16s ease;
+    }
+    .file-drop:hover, .file-drop.dragover {
+      border-color: var(--green);
+      background: var(--lime-soft);
+    }
+    .file-drop input {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: .82rem;
+      cursor: pointer;
+    }
+    .file-drop input::file-selector-button {
+      margin-right: 10px;
+      border: 1px solid var(--green);
+      border-radius: 8px;
+      padding: 8px 11px;
+      background: var(--green);
+      color: #fff;
+      font: 750 .82rem "Nunito", ui-rounded, sans-serif;
+      cursor: pointer;
+    }
+    .file-title { display: block; font-weight: 850; }
+    .file-help { display: block; margin-top: 3px; color: var(--muted); font-size: .88rem; }
+    .rom-meta {
+      display: none;
+      margin-top: 12px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      background: var(--lime-soft);
+      color: var(--green-strong);
+      font-size: .88rem;
+      font-weight: 750;
+      overflow-wrap: anywhere;
+    }
+    .rom-meta.show { display: block; }
+
+    .field-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px; }
+    .field-label { display: block; margin-bottom: 7px; font-size: .86rem; font-weight: 750; }
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--paper);
+      color: var(--ink);
+      padding: 11px 12px;
+    }
+    .secondary {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 14px;
+      background: var(--paper-2);
+      color: var(--ink);
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .secondary:hover { border-color: var(--green); }
+
+    .checks { display: grid; gap: 7px; }
+    .check {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 7px 0;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .check input {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      margin: 1px 0 0;
+      border: 2px solid var(--line);
+      border-radius: 6px;
+      background: var(--paper);
+      display: grid;
+      place-content: center;
+    }
+    .check input::before {
+      content: "";
+      width: 10px;
+      height: 6px;
+      border-left: 3px solid #102117;
+      border-bottom: 3px solid #102117;
+      transform: rotate(-45deg) scale(0);
+      transition: transform .12s ease;
+    }
+    .check input:checked { border-color: var(--lime); background: var(--lime); }
+    .check input:checked::before { transform: rotate(-45deg) scale(1); }
+
+    .starter-wrap { margin-top: 14px; }
+    .help { margin: 6px 0 0; color: var(--muted); font-size: .8rem; }
+
+    .scales { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+    .scale-box {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--paper-2);
+    }
+    .scale-box label { display: block; min-height: 38px; color: var(--muted); font-size: .8rem; font-weight: 750; }
+    .percent { position: relative; margin-top: 8px; }
+    .percent input { padding-right: 32px; background: var(--paper); font-weight: 850; }
+    .percent span { position: absolute; right: 11px; top: 11px; color: var(--muted); }
+
+    .run-area { padding: 22px; border-top: 1px solid var(--line); }
+    .generate {
+      width: 100%;
+      border: 0;
+      border-radius: 12px 12px 12px 3px;
+      padding: 15px 18px;
+      background: var(--green);
+      color: #fff;
+      font-weight: 850;
+      cursor: pointer;
+      box-shadow: 0 7px 0 color-mix(in srgb, var(--green) 72%, #000);
+      transform: translateY(-2px);
+    }
+    .generate:hover { filter: brightness(1.06); }
+    .generate:active { transform: translateY(4px); box-shadow: 0 1px 0 color-mix(in srgb, var(--green) 72%, #000); }
+    .generate:disabled { cursor: wait; filter: grayscale(.5); opacity: .7; transform: none; box-shadow: none; }
+
+    .notice {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 13px;
+      border-radius: 10px;
+      font-size: .9rem;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+    .notice.show { display: block; }
+    .notice.error { background: var(--danger-soft); color: var(--danger); }
+    .notice.success { background: var(--lime-soft); color: var(--green-strong); }
+
+    .downloads { display: none; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 14px; }
+    .downloads.show { display: grid; }
+    .download {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--green);
+      border-radius: 10px;
+      background: var(--paper);
+      color: var(--green-strong);
+      text-align: center;
+      text-decoration: none;
+      font: 850 1rem "Nunito", ui-rounded, sans-serif;
+      cursor: pointer;
+    }
+    .download.primary-download { background: var(--lime); color: #142014; border-color: var(--lime); }
+
+    .log-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 18px 18px 12px;
+    }
+    .log-head h2 { margin: 0; font-size: 1rem; }
+    .clear {
+      border: 0;
+      background: transparent;
+      color: var(--green);
+      font-size: .8rem;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .log {
+      min-height: 310px;
+      max-height: 500px;
+      overflow-y: auto;
+      margin: 0;
+      padding: 0 18px 18px;
+      list-style: none;
+      font: 400 .78rem/1.55 "DM Mono", ui-monospace, monospace;
+      color: var(--muted);
+      scrollbar-color: var(--line) transparent;
+    }
+    .log li { padding: 8px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+    .log li::before { content: "> "; color: var(--green); }
+    .log .log-error { color: var(--danger); }
+    .log .log-success { color: var(--green-strong); }
+
+    .compat {
+      margin-top: 18px;
+      padding: 15px 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: color-mix(in srgb, var(--paper) 75%, transparent);
+      color: var(--muted);
+      font-size: .86rem;
+    }
+    .compat strong { color: var(--ink); }
+
+    @media (max-width: 760px) {
+      .page { width: min(100% - 22px, 620px); padding-top: 24px; }
+      .intro { grid-template-columns: 1fr; gap: 14px; align-items: start; }
+      .privacy-note { width: fit-content; white-space: normal; }
+      .workspace { grid-template-columns: 1fr; }
+      .main-card, .side-card { border-radius: 18px; }
+      .log { min-height: 180px; max-height: 280px; }
+    }
+
+    @media (max-width: 480px) {
+      .section, .run-area { padding: 18px 16px; }
+      .field-row { grid-template-columns: 1fr; }
+      .secondary { width: 100%; }
+      .scales { grid-template-columns: 1fr; }
+      .scale-box { display: grid; grid-template-columns: 1fr 112px; align-items: center; gap: 12px; }
+      .scale-box label { min-height: 0; }
+      .percent { margin-top: 0; }
+      .downloads { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="intro">
+      <div>
+        <h1>Remix your monster journey.</h1>
+        <p>Choose a clean Dragon Warrior Monsters 2 ROM, tune the rules, and build a fresh randomized adventure.</p>
+      </div>
+      <div class="privacy-note"><span class="privacy-dot"></span>Your ROM never leaves this device</div>
+    </header>
+
+    <div class="workspace">
+      <form class="card main-card" id="randomizerForm" novalidate>
+        <section class="section">
+          <h2 class="section-title"><span>Choose your ROM</span><span class="step">01 / INPUT</span></h2>
+          <label class="file-drop" id="dropZone">
+            <input id="romFile" type="file" accept=".gbc,application/octet-stream" />
+            <span class="file-title" id="fileTitle">Tap to select a .gbc file</span>
+            <span class="file-help">Or drop the file here. It is read only in this browser.</span>
+          </label>
+          <div class="rom-meta" id="romMeta"></div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title"><span>Set the seed</span><span class="step">02 / SEED</span></h2>
+          <label class="field-label" for="seed">Seed text</label>
+          <div class="field-row">
+            <input id="seed" type="text" autocomplete="off" spellcheck="false" placeholder="Any word, phrase, or number" />
+            <button class="secondary" id="randomSeed" type="button">Random seed</button>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title"><span>Randomization</span><span class="step">03 / RULES</span></h2>
+          <div class="checks">
+            <label class="check"><input id="growth" type="checkbox" checked /><span>Redistribute monster growth</span></label>
+            <label class="check"><input id="resistances" type="checkbox" checked /><span>Redistribute resistances</span></label>
+            <label class="check"><input id="skills" type="checkbox" checked /><span>Randomize monster skills</span></label>
+            <label class="check"><input id="encounters" type="checkbox" checked /><span>Randomize encounters</span></label>
+            <label class="check"><input id="genius" type="checkbox" /><span>Genius mode</span></label>
+          </div>
+          <div class="starter-wrap">
+            <label class="field-label" for="starter">Starter monster ID</label>
+            <input id="starter" type="text" value="0" inputmode="text" spellcheck="false" />
+            <p class="help">Use 0 for a random starter. Hex such as 0x56 is accepted.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title"><span>Scaling</span><span class="step">04 / BALANCE</span></h2>
+          <div class="scales">
+            <div class="scale-box">
+              <label for="expPercent">Enemy EXP</label>
+              <div class="percent"><input id="expPercent" type="number" value="100" min="0" max="500" step="1" inputmode="numeric" /><span>%</span></div>
+            </div>
+            <div class="scale-box">
+              <label for="statPercent">Wild enemy stats</label>
+              <div class="percent"><input id="statPercent" type="number" value="100" min="0" max="500" step="1" inputmode="numeric" /><span>%</span></div>
+            </div>
+            <div class="scale-box">
+              <label for="bossPercent">Boss stats</label>
+              <div class="percent"><input id="bossPercent" type="number" value="100" min="0" max="500" step="1" inputmode="numeric" /><span>%</span></div>
+            </div>
+          </div>
+        </section>
+
+        <div class="run-area">
+          <button class="generate" id="generate" type="submit">Generate Randomized ROM</button>
+          <div class="notice" id="notice" role="status" aria-live="polite"></div>
+          <div class="downloads" id="downloads">
+            <a class="download primary-download" id="romDownload" download>Download randomized .gbc</a>
+            <a class="download" id="manifestDownload" download>Download manifest</a>
+          </div>
+        </div>
+      </form>
+
+      <aside class="card side-card" aria-label="Activity log">
+        <div class="log-head">
+          <h2>Randomizer log</h2>
+          <button class="clear" id="clearLog" type="button">Clear</button>
+        </div>
+        <ol class="log" id="log" aria-live="polite">
+          <li>Waiting for a clean DWM2 ROM.</li>
+        </ol>
+      </aside>
+    </div>
+
+    <p class="compat"><strong>Seed compatibility:</strong> Web seeds do not match the desktop Python version because this edition uses a browser-safe deterministic PRNG.</p>
+  </main>
+
+  <script>
+    'use strict';
+
+    const MONSTER_TABLE = 0xD4368;
+    const MONSTER_RECORD_SIZE = 47;
+    const MONSTER_COUNT = 313;
+    const ENCOUNTER_TABLE = 0xD008F;
+    const ENCOUNTER_RECORD_SIZE = 26;
+    const ENCOUNTER_COUNT = 614;
+    const MIN_ROM_SIZE = Math.max(
+      MONSTER_TABLE + MONSTER_RECORD_SIZE * MONSTER_COUNT,
+      ENCOUNTER_TABLE + ENCOUNTER_RECORD_SIZE * ENCOUNTER_COUNT
+    );
+
+    const VALID_RANGES = [
+      [0x01, 0x1A], [0x24, 0x42], [0x47, 0x66], [0x6A, 0x84],
+      [0x8D, 0xA7], [0xB0, 0xC9], [0xD3, 0xF0], [0xF6, 0x110],
+      [0x119, 0x138], [0x13C, 0x15B], [0x15F, 0x174]
+    ];
+    const VALID_MONSTERS = [];
+    for (const [low, high] of VALID_RANGES) {
+      for (let id = low; id <= high; id++) VALID_MONSTERS.push(id);
+    }
+    const VALID_MONSTER_SET = new Set(VALID_MONSTERS);
+
+    const TIER_ONE_SKILLS = [
+      1,4,7,10,13,16,19,21,22,25,27,30,32,33,34,35,36,37,39,41,
+      43,45,46,47,49,51,52,53,54,56,57,58,60,61,62,63,64,68,72,
+      74,75,76,78,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,
+      95,96,97,98,99,101,102,103,104,105,106,107,108,109,110,111,
+      112,113,114,115,116,117,118,120,121,122,123,124,125,126,127,
+      128,129,130,131,132,133,137,138,139,141,143,144,145,146,147,
+      148,149,150,151,153,155,156,157,158,159,160,161,162,163,164,
+      165,166,167,168,169
+    ];
+    const BOSS_ENCOUNTERS = new Set([
+      6,25,27,49,67,99,106,107,108,114,115,116,130,131,132,133,134,
+      135,376,385,398,399,408,409,410,411,421,426
+    ]);
+
+    const $ = (id) => document.getElementById(id);
+    let inputRom = null;
+    let inputFileName = '';
+    let inputSha256 = '';
+    let generatedRomFile = null;
+    let generatedAppleBundleFile = null;
+    let appleShareUnavailable = false;
+    let activeUrls = [];
+
+    function log(message, type = '') {
+      const item = document.createElement('li');
+      item.textContent = message;
+      if (type) item.className = `log-${type}`;
+      $('log').appendChild(item);
+      $('log').scrollTop = $('log').scrollHeight;
+    }
+
+    function showNotice(message, type) {
+      const el = $('notice');
+      el.textContent = message;
+      el.className = `notice show ${type}`;
+    }
+
+    function clearNotice() {
+      $('notice').className = 'notice';
+      $('notice').textContent = '';
+    }
+
+    function revokeDownloads() {
+      for (const url of activeUrls) URL.revokeObjectURL(url);
+      activeUrls = [];
+      generatedRomFile = null;
+      generatedAppleBundleFile = null;
+      appleShareUnavailable = false;
+      $('downloads').className = 'downloads';
+    }
+
+    const CRC32_TABLE = (() => {
+      const table = new Uint32Array(256);
+      for (let value = 0; value < 256; value++) {
+        let crc = value;
+        for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xEDB88320 : 0);
+        table[value] = crc >>> 0;
+      }
+      return table;
+    })();
+
+    function crc32(bytes) {
+      let crc = 0xFFFFFFFF;
+      for (const byte of bytes) crc = (crc >>> 8) ^ CRC32_TABLE[(crc ^ byte) & 0xFF];
+      return (crc ^ 0xFFFFFFFF) >>> 0;
+    }
+
+    function createStoreZip(entries, fileName) {
+      const encoder = new TextEncoder();
+      const prepared = entries.map((entry) => ({
+        name: encoder.encode(entry.name),
+        data: entry.data instanceof Uint8Array ? entry.data : new Uint8Array(entry.data),
+        crc: crc32(entry.data instanceof Uint8Array ? entry.data : new Uint8Array(entry.data))
+      }));
+      let localSize = 0;
+      let centralSize = 0;
+      for (const entry of prepared) {
+        localSize += 30 + entry.name.length + entry.data.length;
+        centralSize += 46 + entry.name.length;
+      }
+      const output = new Uint8Array(localSize + centralSize + 22);
+      const view = new DataView(output.buffer);
+      let offset = 0;
+      const centralEntries = [];
+
+      for (const entry of prepared) {
+        const localOffset = offset;
+        view.setUint32(offset, 0x04034B50, true);
+        view.setUint16(offset + 4, 20, true);
+        view.setUint16(offset + 6, 0x0800, true);
+        view.setUint16(offset + 8, 0, true);
+        view.setUint16(offset + 10, 0, true);
+        view.setUint16(offset + 12, 33, true);
+        view.setUint32(offset + 14, entry.crc, true);
+        view.setUint32(offset + 18, entry.data.length, true);
+        view.setUint32(offset + 22, entry.data.length, true);
+        view.setUint16(offset + 26, entry.name.length, true);
+        view.setUint16(offset + 28, 0, true);
+        offset += 30;
+        output.set(entry.name, offset);
+        offset += entry.name.length;
+        output.set(entry.data, offset);
+        offset += entry.data.length;
+        centralEntries.push({ entry, localOffset });
+      }
+
+      const centralOffset = offset;
+      for (const { entry, localOffset } of centralEntries) {
+        view.setUint32(offset, 0x02014B50, true);
+        view.setUint16(offset + 4, 20, true);
+        view.setUint16(offset + 6, 20, true);
+        view.setUint16(offset + 8, 0x0800, true);
+        view.setUint16(offset + 10, 0, true);
+        view.setUint16(offset + 12, 0, true);
+        view.setUint16(offset + 14, 33, true);
+        view.setUint32(offset + 16, entry.crc, true);
+        view.setUint32(offset + 20, entry.data.length, true);
+        view.setUint32(offset + 24, entry.data.length, true);
+        view.setUint16(offset + 28, entry.name.length, true);
+        view.setUint16(offset + 30, 0, true);
+        view.setUint16(offset + 32, 0, true);
+        view.setUint16(offset + 34, 0, true);
+        view.setUint16(offset + 36, 0, true);
+        view.setUint32(offset + 38, 0, true);
+        view.setUint32(offset + 42, localOffset, true);
+        offset += 46;
+        output.set(entry.name, offset);
+        offset += entry.name.length;
+      }
+
+      const writtenCentralSize = offset - centralOffset;
+      view.setUint32(offset, 0x06054B50, true);
+      view.setUint16(offset + 4, 0, true);
+      view.setUint16(offset + 6, 0, true);
+      view.setUint16(offset + 8, prepared.length, true);
+      view.setUint16(offset + 10, prepared.length, true);
+      view.setUint32(offset + 12, writtenCentralSize, true);
+      view.setUint32(offset + 16, centralOffset, true);
+      view.setUint16(offset + 20, 0, true);
+      return new File([output], fileName, { type: 'application/zip' });
+    }
+
+    function readU16LE(bytes, offset) {
+      return bytes[offset] | (bytes[offset + 1] << 8);
+    }
+
+    function writeU16LE(bytes, offset, value) {
+      bytes[offset] = value & 0xFF;
+      bytes[offset + 1] = (value >>> 8) & 0xFF;
+    }
+
+    function decodeRomTitle(bytes) {
+      let title = '';
+      for (let i = 0x134; i < 0x144 && i < bytes.length; i++) {
+        const b = bytes[i];
+        if (b === 0) break;
+        title += (b >= 32 && b <= 126) ? String.fromCharCode(b) : '\uFFFD';
+      }
+      return title.replace(/[\x00\s]+$/g, '');
+    }
+
+    function editionHint(bytes) {
+      const title = decodeRomTitle(bytes).toUpperCase();
+      const compact = title.replace(/[^A-Z0-9]/g, '');
+      if (title.includes('TARA') || compact.startsWith('DWM2T') || compact.includes('DWM2TA')) {
+        return "Tara's Adventure";
+      }
+      if (title.includes('COBI') || compact.startsWith('DWM2C') || compact.includes('DWM2CJ')) {
+        return "Cobi's Journey";
+      }
+      return 'Dragon Warrior Monsters 2';
+    }
+
+    function validateRom(bytes) {
+      if (bytes.length < 0x150) throw new Error('That file is too small to be a Game Boy Color ROM.');
+      const logo = [0xCE, 0xED, 0x66, 0x66];
+      if (!logo.every((value, i) => bytes[0x104 + i] === value)) {
+        throw new Error('That file does not contain a valid Game Boy header logo. Please choose a clean DWM2 ROM.');
+      }
+      if (bytes.length < MIN_ROM_SIZE) {
+        throw new Error(`That ROM is too small for the DWM2 data tables. It needs at least ${MIN_ROM_SIZE.toLocaleString()} bytes.`);
+      }
+    }
+
+    async function sha256Hex(bytes) {
+      const digest = await crypto.subtle.digest('SHA-256', bytes);
+      return Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function seedToUint64(seed) {
+      const data = new TextEncoder().encode(seed);
+      const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', data));
+      let value = 0n;
+      for (let i = 0; i < 8; i++) value = (value << 8n) | BigInt(digest[i]);
+      return value;
+    }
+
+    function makeSplitMix64(initialSeed) {
+      let state = BigInt.asUintN(64, initialSeed);
+      const mask = 0xFFFFFFFFFFFFFFFFn;
+      const next64 = () => {
+        state = (state + 0x9E3779B97F4A7C15n) & mask;
+        let z = state;
+        z = ((z ^ (z >> 30n)) * 0xBF58476D1CE4E5B9n) & mask;
+        z = ((z ^ (z >> 27n)) * 0x94D049BB133111EBn) & mask;
+        return (z ^ (z >> 31n)) & mask;
+      };
+      const random = () => Number(next64() >> 11n) / 9007199254740992;
+      const int = (maxExclusive) => Math.floor(random() * maxExclusive);
+      const choice = (items) => items[int(items.length)];
+      return { random, int, choice };
+    }
+
+    function sampleDistinct(rng, items, count) {
+      const pool = items.slice();
+      const result = [];
+      for (let i = 0; i < count; i++) {
+        const index = rng.int(pool.length);
+        result.push(pool[index]);
+        pool[index] = pool[pool.length - 1];
+        pool.pop();
+      }
+      return result;
+    }
+
+    function redistribute(rng, original, low, high) {
+      let total = 0;
+      for (const value of original) total += Math.max(low, Math.min(high, value));
+      const result = new Uint8Array(original.length);
+      result.fill(low);
+      let remaining = Math.min(total - low * result.length, (high - low) * result.length);
+      const available = Array.from({ length: result.length }, (_, i) => i);
+      while (remaining > 0 && available.length) {
+        const pick = rng.int(available.length);
+        const slot = available[pick];
+        result[slot]++;
+        remaining--;
+        if (result[slot] >= high) available.splice(pick, 1);
+      }
+      return result;
+    }
+
+    function scaleU16(bytes, offset, percent, maximum = 65535) {
+      const value = readU16LE(bytes, offset);
+      const scaled = Math.max(0, Math.min(maximum, Math.round(value * percent / 100)));
+      writeU16LE(bytes, offset, scaled);
+    }
+
+    function repairChecksums(bytes) {
+      let header = 0;
+      for (let i = 0x134; i < 0x14D; i++) header = (header - bytes[i] - 1) & 0xFF;
+      bytes[0x14D] = header;
+      let total = 0;
+      for (let i = 0; i < 0x14E; i++) total = (total + bytes[i]) & 0xFFFF;
+      for (let i = 0x150; i < bytes.length; i++) total = (total + bytes[i]) & 0xFFFF;
+      bytes[0x14E] = (total >>> 8) & 0xFF;
+      bytes[0x14F] = total & 0xFF;
+    }
+
+    async function randomizeRom(data, seed, options) {
+      validateRom(data);
+      const rom = new Uint8Array(data);
+      const rng = makeSplitMix64(await seedToUint64(seed));
+      const summary = {
+        growth_records: 0,
+        resistance_records: 0,
+        skill_records: 0,
+        encounter_records: 0,
+        scaled_records: 0,
+        genius_records: 0
+      };
+
+      for (let index = 0; index < MONSTER_COUNT; index++) {
+        const base = MONSTER_TABLE + index * MONSTER_RECORD_SIZE;
+        if (options.growth) {
+          const changed = redistribute(rng, rom.slice(base + 14, base + 20), 1, 31);
+          rom.set(changed, base + 14);
+          summary.growth_records++;
+        }
+        if (options.resistances) {
+          const changed = redistribute(rng, rom.slice(base + 20, base + 47), 0, 3);
+          rom.set(changed, base + 20);
+          summary.resistance_records++;
+        }
+        if (options.skills) {
+          rom.set(sampleDistinct(rng, TIER_ONE_SKILLS, 3), base + 10);
+          summary.skill_records++;
+        }
+        if (options.genius) {
+          rom[base + 19] = 31;
+          summary.genius_records++;
+        }
+      }
+
+      for (let index = 0; index < ENCOUNTER_COUNT; index++) {
+        const base = ENCOUNTER_TABLE + index * ENCOUNTER_RECORD_SIZE;
+        if (options.encounters) {
+          const currentId = readU16LE(rom, base);
+          if (currentId !== 0x5A && currentId !== 0xB9) {
+            let monsterId;
+            if (index === 0 && options.starter_id) monsterId = options.starter_id;
+            else if (index === 26) monsterId = 0x13C + rng.int(0x15C - 0x13C);
+            else monsterId = rng.choice(VALID_MONSTERS);
+            writeU16LE(rom, base, monsterId);
+            summary.encounter_records++;
+          }
+        }
+
+        scaleU16(rom, base + 6, options.exp_percent);
+        const statPercent = BOSS_ENCOUNTERS.has(index) ? options.boss_percent : options.stat_percent;
+        for (let stat = 0; stat < 6; stat++) scaleU16(rom, base + 10 + stat * 2, statPercent, 999);
+        if (options.genius) writeU16LE(rom, base + 20, 999);
+        summary.scaled_records++;
+      }
+
+      repairChecksums(rom);
+      return { rom, summary };
+    }
+
+    function parseStarter(value) {
+      const text = value.trim() || '0';
+      let parsed;
+      if (/^0x[0-9a-f]+$/i.test(text)) parsed = Number.parseInt(text.slice(2), 16);
+      else if (/^[0-9]+$/.test(text)) parsed = Number.parseInt(text, 10);
+      else throw new Error('Starter ID must be 0, a decimal number, or hex such as 0x56.');
+      if (!Number.isSafeInteger(parsed)) throw new Error('Starter ID is not a valid number.');
+      if (parsed !== 0 && !VALID_MONSTER_SET.has(parsed)) {
+        throw new Error('Starter ID is outside the supported DWM2 monster ranges.');
+      }
+      return parsed;
+    }
+
+    function parsePercent(id, label) {
+      const raw = $(id).value.trim();
+      if (raw === '') throw new Error(`${label} must be between 0 and 500.`);
+      const value = Number(raw);
+      if (!Number.isInteger(value) || value < 0 || value > 500) {
+        throw new Error(`${label} must be a whole number from 0 to 500.`);
+      }
+      return value;
+    }
+
+    function safeSeedName(seed) {
+      const cleaned = seed.replace(/[^a-z0-9._-]+/gi, '_').replace(/^_+|_+$/g, '').slice(0, 64);
+      return cleaned || 'seed';
+    }
+
+    async function loadRom(file) {
+      clearNotice();
+      revokeDownloads();
+      if (!file) return;
+      try {
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        validateRom(bytes);
+        inputRom = bytes;
+        inputFileName = file.name;
+        inputSha256 = await sha256Hex(bytes);
+        const title = decodeRomTitle(bytes) || 'untitled header';
+        const edition = editionHint(bytes);
+        $('fileTitle').textContent = file.name;
+        $('romMeta').textContent = `${edition} · “${title}” · ${bytes.length.toLocaleString()} bytes · SHA-256 ${inputSha256.slice(0, 12)}…`;
+        $('romMeta').className = 'rom-meta show';
+        log(`Loaded ${file.name} as ${edition}.`, 'success');
+      } catch (error) {
+        inputRom = null;
+        inputFileName = '';
+        inputSha256 = '';
+        $('romFile').value = '';
+        $('fileTitle').textContent = 'Tap to select a .gbc file';
+        $('romMeta').className = 'rom-meta';
+        showNotice(error.message, 'error');
+        log(`ERROR: ${error.message}`, 'error');
+      }
+    }
+
+    $('romFile').addEventListener('change', (event) => loadRom(event.target.files[0]));
+
+    const dropZone = $('dropZone');
+    for (const eventName of ['dragenter', 'dragover']) {
+      dropZone.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+    }
+    for (const eventName of ['dragleave', 'drop']) {
+      dropZone.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        dropZone.classList.remove('dragover');
+      });
+    }
+    dropZone.addEventListener('drop', (event) => loadRom(event.dataTransfer.files[0]));
+
+    $('randomSeed').addEventListener('click', () => {
+      const parts = new Uint32Array(2);
+      crypto.getRandomValues(parts);
+      $('seed').value = ((BigInt(parts[0]) << 32n) | BigInt(parts[1])).toString();
+      clearNotice();
+    });
+
+    $('clearLog').addEventListener('click', () => {
+      $('log').innerHTML = '';
+      log('Log cleared.');
+    });
+
+    function isAppleMobile() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
+
+    $('romDownload').addEventListener('click', async (event) => {
+      if (!generatedRomFile) {
+        event.preventDefault();
+        showNotice('Generate a randomized ROM first.', 'error');
+        return;
+      }
+
+      const appleDownload = isAppleMobile() && generatedAppleBundleFile;
+      const downloadFile = appleDownload || generatedRomFile;
+      const shareData = {
+        files: [downloadFile],
+        title: 'Randomized DWM2 ROM'
+      };
+
+      // iOS rejects unknown .gbc files in some browser share sheets. The Apple
+      // path uses a standard ZIP containing the ROM and manifest; Android and
+      // desktop keep the direct .gbc download.
+      if (appleDownload && !appleShareUnavailable && navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        event.preventDefault();
+        try {
+          await navigator.share(shareData);
+          showNotice('ROM bundle ready. Choose Save to Files, then tap the ZIP once to extract the .gbc.', 'success');
+          log(`Opened the save/share sheet for ${downloadFile.name}.`, 'success');
+        } catch (error) {
+          if (error && error.name === 'AbortError') {
+            log('Save/share sheet closed without saving.');
+          } else {
+            appleShareUnavailable = true;
+            showNotice('The save sheet could not open. Tap the download button again to save the ZIP directly.', 'error');
+            log(`ERROR: ${error.message || error}. Direct ZIP fallback enabled.`, 'error');
+          }
+        }
+        return;
+      }
+
+      if (appleDownload) {
+        showNotice('ROM ZIP download started. Open it in Files to extract the .gbc.', 'success');
+      } else {
+        showNotice('ROM download started. Check your Downloads folder.', 'success');
+      }
+      log(`Started download for ${downloadFile.name}.`, 'success');
+    });
+
+    $('randomizerForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearNotice();
+      revokeDownloads();
+      const button = $('generate');
+      try {
+        if (!inputRom) throw new Error('Choose a clean DWM2 .gbc file first.');
+        let seed = $('seed').value.trim();
+        if (!seed) {
+          $('randomSeed').click();
+          seed = $('seed').value.trim();
+        }
+        const options = {
+          growth: $('growth').checked,
+          resistances: $('resistances').checked,
+          skills: $('skills').checked,
+          encounters: $('encounters').checked,
+          genius: $('genius').checked,
+          starter_id: parseStarter($('starter').value),
+          exp_percent: parsePercent('expPercent', 'Enemy EXP'),
+          stat_percent: parsePercent('statPercent', 'Wild enemy stats'),
+          boss_percent: parsePercent('bossPercent', 'Boss stats')
+        };
+
+        button.disabled = true;
+        button.textContent = 'Randomizing…';
+        log(`Starting seed: ${seed}`);
+        await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
+
+        const { rom, summary } = await randomizeRom(inputRom, seed, options);
+        const outputSha256 = await sha256Hex(rom);
+        const edition = editionHint(inputRom);
+        const manifest = {
+          application: 'DWM2 Randomizer Web',
+          version: '5.6.0-web',
+          rng: 'splitmix64 seeded from the first 8 bytes of SHA-256(seed)',
+          seed,
+          edition_hint: edition,
+          source_filename: inputFileName,
+          input_sha256: inputSha256 || await sha256Hex(inputRom),
+          output_sha256: outputSha256,
+          options,
+          summary
+        };
+
+        const stem = `DWM2_Randomized_${safeSeedName(seed)}`;
+        const manifestName = `${stem}.manifest.json`;
+        const manifestBytes = new TextEncoder().encode(JSON.stringify(manifest, null, 2));
+        generatedRomFile = new File([rom], `${stem}.gbc`, { type: 'application/octet-stream' });
+        generatedAppleBundleFile = createStoreZip([
+          { name: generatedRomFile.name, data: rom },
+          { name: manifestName, data: manifestBytes }
+        ], `${stem}.zip`);
+        const romUrl = URL.createObjectURL(generatedRomFile);
+        const appleBundleUrl = URL.createObjectURL(generatedAppleBundleFile);
+        const manifestUrl = URL.createObjectURL(new Blob([manifestBytes], { type: 'application/json' }));
+        activeUrls.push(romUrl, appleBundleUrl, manifestUrl);
+        if (isAppleMobile()) {
+          $('romDownload').href = appleBundleUrl;
+          $('romDownload').download = generatedAppleBundleFile.name;
+          $('romDownload').textContent = 'Save ROM bundle (.zip)';
+        } else {
+          $('romDownload').href = romUrl;
+          $('romDownload').download = generatedRomFile.name;
+          $('romDownload').textContent = 'Download randomized .gbc';
+        }
+        $('manifestDownload').href = manifestUrl;
+        $('manifestDownload').download = manifestName;
+        $('downloads').className = 'downloads show';
+
+        log(`Growth records: ${summary.growth_records}`);
+        log(`Resistance records: ${summary.resistance_records}`);
+        log(`Skill records: ${summary.skill_records}`);
+        log(`Encounter records: ${summary.encounter_records}`);
+        log(`Scaled encounter records: ${summary.scaled_records}`);
+        log(`Genius monster records: ${summary.genius_records}`);
+        log(`Checksums repaired. Output SHA-256 ${outputSha256}`, 'success');
+        showNotice(isAppleMobile()
+          ? 'Randomization complete. Save the ZIP to Files, then tap it once to extract the .gbc ROM.'
+          : 'Randomization complete. Tap Download randomized .gbc below to save it to Downloads.', 'success');
+      } catch (error) {
+        showNotice(error.message || 'Randomization failed.', 'error');
+        log(`ERROR: ${error.message || error}`, 'error');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Generate Randomized ROM';
+      }
+    });
+  </script>
+</body>
+</html>
